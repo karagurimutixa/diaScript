@@ -1,0 +1,3 @@
+set x to 5;
+add x and 5 into result;
+if result > 10 then terminal_print("x + 5 is bigger than 10") else terminal_print("x + 5 isn't bigger than 10");

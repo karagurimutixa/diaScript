@@ -1,2 +1,0 @@
-set age to 20;
-if age >= 18 then terminal_print("You are an adult!") else  terminal_print("You are a minor!");

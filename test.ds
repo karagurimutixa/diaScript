@@ -1,3 +1,0 @@
-terminal_print("Hello, World");
-set age to 20;
-terminal_print(age);

@@ -13,7 +13,7 @@ diaScript is a simple scripting language interpreter built with Node.js. This gu
 
    git clone https://github.com/karagurimutixa/diaScript.git
    cd diaScript
-
+.
 2. **Install dependencies**
 npm install
 

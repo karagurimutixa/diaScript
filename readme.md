@@ -11,7 +11,7 @@ diaScript is a simple scripting language interpreter built with Node.js. This gu
 
 1. **Clone the repository**
 
-   git clone https://github.com/your-username/diaScript.git
+   git clone https://github.com/karagurimutixa/diaScript.git
    cd diaScript
 
 2. **Install dependencies**

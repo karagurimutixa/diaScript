@@ -37,6 +37,7 @@ async function createProject(auto = false) {
 
     console.log('Project created successfully!');
     rl.close();
+    process.exit(0);
 }
 
 async function updateVersion(version) {
@@ -49,6 +50,7 @@ async function updateVersion(version) {
     } else {
         console.error('Error: project.json not found.');
     }
+    process.exit(0);
 }
 
 async function main() {
@@ -61,6 +63,7 @@ async function main() {
             } else {
                 console.error('Usage: dia st <filePath>');
             }
+            process.exit(0);
             break;
         case 'project-create':
             if (args[0] === '-y') {
@@ -68,6 +71,7 @@ async function main() {
             } else {
                 await createProject();
             }
+            process.exit(0);
             break;
         case 'project-update-vs':
             if (args[0]) {
@@ -75,9 +79,11 @@ async function main() {
             } else {
                 console.error('Usage: dia project-update-vs <version>');
             }
+            process.exit(0);
             break;
         default:
             console.error('Unknown command.');
+            process.exit(0);
             break;
     }
 }

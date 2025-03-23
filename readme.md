@@ -76,5 +76,3 @@ Contributions are welcome! Please open an issue or submit a pull request on GitH
 
 ## License
 This project is licensed under the MIT License.
-
-This `readme.md` file provides detailed instructions for setting up and using the `diaScript` project, including installing dependencies, setting up the PATH, creating and running scripts, and understanding the syntax.This `readme.md` file provides detailed instructions for setting up and using the `diaScript` project, including installing dependencies, setting up the PATH, creating and running scripts, and understanding the syntax.

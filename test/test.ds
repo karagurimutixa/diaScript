@@ -1,0 +1,40 @@
+// Variable assignment
+x = 10;
+y = 20;
+message = "The result is: ";
+
+// Arithmetic operations
+sum = x + y;
+difference = y - x;
+product = x * y;
+quotient = y / x;
+
+// Print results
+terminal_print(message + sum);
+terminal_print(message + difference);
+terminal_print(message + product);
+terminal_print(message + quotient);
+
+// Conditional statement
+if sum > 20 then
+    terminal_print("Sum is greater than 20")
+else
+    terminal_print("Sum is not greater than 20");
+
+// Loop statement
+repeat 5 times do
+    terminal_print("This is a repeated message");
+
+// Function definition and call
+define greet(name) as
+    terminal_print("Hello, " + name)
+;
+
+call greet("World");
+call greet("DiaScript User");
+
+// Repeat until statement
+counter = 0;
+repeat_until counter >= 5 do
+    terminal_print("Counter is: " + counter);
+    counter = counter + 1;

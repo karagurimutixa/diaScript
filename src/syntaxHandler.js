@@ -2,22 +2,19 @@ const variables = {};
 
 const syntaxRules = {
     'terminal_print': {
-        regex: /^terminal_print\((.*)\);$/,
+        regex: /^terminal_print\((.*)\);?$/,
         execute: (match, lineNumber) => {
             const content = match[1].trim();
-            if (/^".*"$/.test(content)) {
-                // Handle string literals
-                console.log(content.slice(1, -1));
-            } else if (variables.hasOwnProperty(content)) {
-                // Handle variable names
-                console.log(variables[content]);
-            } else {
-                console.error(`Error at line ${lineNumber}: Undefined variable "${content}"`);
+            try {
+                const result = eval(content.replace(/\b(\w+)\b/g, (match) => variables[match] !== undefined ? variables[match] : match));
+                console.log(result);
+            } catch (e) {
+                console.error(`Error at line ${lineNumber}: Invalid expression or undefined variable in terminal_print at "${content}"`);
             }
         }
     },
     'variable_assignment': {
-        regex: /^set\s+(\w+)\s+to\s+([-+]?\d+(\.\d+)?|".*?")\s*;?$/,
+        regex: /^(\w+)\s*=\s*([-+]?\d+(\.\d+)?|".*?")\s*;?$/,
         execute: (match, lineNumber) => {
             const [_, varName, value] = match;
             if (/^".*"$/.test(value)) {
@@ -28,14 +25,32 @@ const syntaxRules = {
         }
     },
     'arithmetic_operation': {
-        regex: /^add\s+(\w+)\s+and\s+(\w+)\s+into\s+(\w+);$/,
+        regex: /^(\w+)\s*=\s*(\w+|\d+)\s*([\+\-\*\/])\s*(\w+|\d+)\s*;?$/,
         execute: (match, lineNumber) => {
-            const [_, operand1, operand2, varName] = match;
+            const [_, varName, operand1, operator, operand2] = match;
             const value1 = isNaN(operand1) ? variables[operand1] : parseFloat(operand1);
             const value2 = isNaN(operand2) ? variables[operand2] : parseFloat(operand2);
 
+            if (typeof value1 === 'string' || typeof value2 === 'string') {
+                console.error(`Error at line ${lineNumber}: Variable is a string and cannot be used in arithmetic operations at "${match[0]}"`);
+                return;
+            }
+
             if (value1 !== undefined && value2 !== undefined) {
-                variables[varName] = value1 + value2;
+                switch (operator) {
+                    case '+':
+                        variables[varName] = value1 + value2;
+                        break;
+                    case '-':
+                        variables[varName] = value1 - value2;
+                        break;
+                    case '*':
+                        variables[varName] = value1 * value2;
+                        break;
+                    case '/':
+                        variables[varName] = value1 / value2;
+                        break;
+                }
             } else {
                 console.error(`Error at line ${lineNumber}: Undefined variable(s) in arithmetic operation at "${match[0]}"`);
             }
@@ -93,10 +108,19 @@ const syntaxRules = {
                 console.error(`Error at line ${lineNumber}: Undefined function "${funcName}"`);
             }
         }
+    },
+    'comment': {
+        regex: /^\/\/.*$/,
+        execute: (match, lineNumber) => {
+            // Do nothing for comments
+        }
     }
 };
 
 function handleSyntax(command, lineNumber) {
+    if (command.trim() === '') {
+        return; // Ignore empty lines
+    }
     for (const rule in syntaxRules) {
         const match = command.match(syntaxRules[rule].regex);
         if (match) {
@@ -116,6 +140,7 @@ function interpret(filePath) {
     lines.forEach((line, index) => {
         handleSyntax(line.trim(), index + 1);
     });
+    process.exit(0); // Ensure the script exits after execution
 }
 
 module.exports = { handleSyntax, variables, interpret };

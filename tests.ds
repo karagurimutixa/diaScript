@@ -1,0 +1,5 @@
+set name to "dünya";
+terminal_print("Merhaba " + name + "!");
+set sayi to 10;
+add sayi and 5 into toplam;
+if toplam > 12 then terminal_print("12'den büyük") else terminal_print("12'den küçük");

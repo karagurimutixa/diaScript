@@ -1,85 +1,87 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-const { handleSyntax, interpret } = require('./syntaxHandler');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function askQuestion(query) {
-    return new Promise(resolve => rl.question(query, resolve));
-}
+class CommandHandler {
+    constructor() {
+        this.commands = new Map();
+        this.loadCommands();
+    }
 
-async function createProject(auto = false) {
-    const projectName = auto ? path.basename(process.cwd()) : await askQuestion('Project name: ') || path.basename(process.cwd());
-    const description = auto ? '' : await askQuestion('Description: ');
-    const version = auto ? '1.0.0' : await askQuestion('Version: ') || '1.0.0';
-    const githubRepo = auto ? '' : await askQuestion('GitHub repository: ');
-    const author = auto ? '' : await askQuestion('Author: ');
-    const license = auto ? 'MIT' : await askQuestion('License: ') || 'MIT';
+    async loadCommands() {
+        const commandsDir = path.join(__dirname, 'commands');
+        
+        if (!fs.existsSync(commandsDir)) {
+            console.error('Commands directory not found:', commandsDir);
+            return;
+        }
 
-    const projectJson = {
-        name: projectName,
-        version: version,
-        description: description,
-        repository: githubRepo,
-        author: author,
-        license: license
-    };
+        const commandFiles = fs.readdirSync(commandsDir)
+            .filter(file => file.endsWith('.js'));
 
-    fs.writeFileSync('project.json', JSON.stringify(projectJson, null, 2));
-    fs.writeFileSync('LICENSE.md', `${license} License\n\nCopyright (c) ${new Date().getFullYear()} ${author}`);
-    fs.writeFileSync('README.md', `# ${projectName}\n\n${description}`);
+        for (const file of commandFiles) {
+            try {
+                const commandPath = `./commands/${file}`;
+                const module = await import(commandPath);
+                const commandName = file.replace('.js', '');
+                
+                if (module.default && typeof module.default === 'function') {
+                    this.commands.set(commandName, module.default);
+                } else if (typeof module === 'function') {
+                    this.commands.set(commandName, module);
+                }
+                console.log(`Loaded command: ${commandName}`);
+            } catch (error) {
+                console.error(`Failed to load command ${file}:`, error);
+            }
+        }
+    }
 
-    console.log('Project created successfully!');
-    rl.close();
-}
+    async handle(args) {
+        const commandName = args[0];
+        
+        if (!commandName || commandName === 'help' || !this.commands.has(commandName)) {
+            return this.showHelp();
+        }
 
-async function updateVersion(version) {
-    const projectJsonPath = path.resolve('project.json');
-    if (fs.existsSync(projectJsonPath)) {
-        const projectJson = JSON.parse(fs.readFileSync(projectJsonPath, 'utf-8'));
-        projectJson.version = version;
-        fs.writeFileSync(projectJsonPath, JSON.stringify(projectJson, null, 2));
-        console.log(`Version updated to ${version}`);
-    } else {
-        console.error('Error: project.json not found.');
+        const command = this.commands.get(commandName);
+        const commandArgs = args.slice(1);
+        
+        try {
+            await command(commandArgs);
+        } catch (error) {
+            console.error(`Error executing command "${commandName}":`, error);
+            process.exit(1);
+        }
+    }
+
+    showHelp() {
+        console.log('diaScript - Custom Scripting Language');
+        console.log('Usage: dia <command> [arguments]\n');
+        console.log('Available commands:');
+        
+        for (const [cmd] of this.commands) {
+            console.log(`  ${cmd}`);
+        }
+        
+        console.log('\nExamples:');
+        console.log('  dia st myscript.ds      # Run a script');
+        console.log('  dia help               # Show this help');
     }
 }
 
-async function main() {
-    const [,, subCommand, ...args] = process.argv;
-
-    switch (subCommand) {
-        case 'st':
-            if (args[0]) {
-                interpret(args[0]);
-            } else {
-                console.error('Usage: dia st <filePath>');
-            }
-            break;
-        case 'project-create':
-            if (args[0] === '-y') {
-                await createProject(true);
-            } else {
-                await createProject();
-            }
-            break;
-        case 'project-update-vs':
-            if (args[0]) {
-                await updateVersion(args[0]);
-            } else {
-                console.error('Usage: dia project-update-vs <version>');
-            }
-            break;
-        default:
-            console.error('Unknown command.');
-            break;
-    }
+// Ana çalıştırma
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    const handler = new CommandHandler();
+    
+    // Komutları yüklemek için biraz zaman ver
+    setTimeout(() => {
+        handler.handle(process.argv.slice(2));
+    }, 100);
 }
 
-main();
+export default CommandHandler;

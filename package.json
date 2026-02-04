@@ -1,17 +1,14 @@
 {
-  "name": "own-coding-system",
+  "name": "diascript",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "type": "module",
+  "bin": {
+    "dia": "./src/commandHandler.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "fs": "^0.0.1-security",
-    "path": "^0.12.7",
-    "readline": "^1.3.0"
-  }
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": ["scripting", "language", "interpreter"],
+  "author": "Karagurimuti",
+  "license": "MIT"
 }
